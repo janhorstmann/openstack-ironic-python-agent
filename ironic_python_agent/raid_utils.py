@@ -103,10 +103,10 @@ def calculate_raid_start(target_boot_mode, partition_table_type, dev_name):
     # granularity is GiB, so you lose up to 1GiB just for a bios boot
     # partition...
     if target_boot_mode == 'uefi':
-        # Leave 551MiB - start_sector s for the esp (approx 550 MiB)
+        # Leave 552MiB - start_sector s for the esp (approx 550 MiB)
         # TODO(dtantsur): 550 MiB is a waste in most cases, make it
         # configurable?
-        raid_start = '%sMiB' % (ESP_SIZE_MIB + 1)
+        raid_start = '%sMiB' % (ESP_SIZE_MIB + 2)
     else:
         if partition_table_type == 'gpt':
             # Leave 8MiB - start_sector s (approx 7MiB)
@@ -359,7 +359,7 @@ def prepare_boot_partitions_for_softraid(device, holders, efi_part,
             # We know that we kept this space when configuring raid,see
             # hardware.GenericHardwareManager.create_configuration.
             # We could also directly get the EFI partition size.
-            partsize_mib = ESP_SIZE_MIB
+            partsize_kib = ESP_SIZE_MIB * 1024 + 64
             partlabel_prefix = 'uefi-holder-'
             efi_partitions = []
             for number, holder in enumerate(holders):
@@ -371,8 +371,8 @@ def prepare_boot_partitions_for_softraid(device, holders, efi_part,
                 out, _u = utils.execute('sgdisk', '-F', holder)
                 start_sector = '{}s'.format(out.splitlines()[-1].strip())
                 out, _u = utils.execute(
-                    'sgdisk', '-n', '0:{}:+{}MiB'.format(start_sector,
-                                                         partsize_mib),
+                    'sgdisk', '-n', '0:{}:+{}KiB'.format(start_sector,
+                                                         partsize_kib),
                     '-t', '0:ef00', '-c', '0:{}'.format(partlabel), holder)
 
                 # Refresh part table
