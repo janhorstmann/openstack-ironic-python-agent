@@ -397,7 +397,7 @@ def prepare_boot_partitions_for_softraid(device, holders, efi_part,
                        'efi_partitions': efi_partitions})
             utils.execute('mdadm', '--create', md_device, '--force',
                           '--run', '--metadata=1.0', '--level', '1',
-                          '--name', 'esp', '--raid-devices',
+                          '--name', 'ESP', '--raid-devices',
                           len(efi_partitions),
                           *efi_partitions)
 
